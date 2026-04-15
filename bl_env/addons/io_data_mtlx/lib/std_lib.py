@@ -2,17 +2,19 @@
 # Licensed under the MIT License. See LICENSE file in the project root for details.
 
 import os
+
 import bpy
 import MaterialX as mx
-from .node_registry import register_materialx_node
+
 from .graph_utils import (
     apply_default_values,
-    create_blender_node,
     blender_from_color4_bundle,
     blender_from_vector4_bundle,
     blender_to_color4_bundle,
     blender_to_vector4_bundle,
-    )
+    create_blender_node,
+)
+from .node_registry import register_materialx_node
 
 
 @register_materialx_node("ND_texcoord_vector2")
@@ -33,7 +35,7 @@ def ND_texcoord_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_divide_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
 
-    node.operation = 'DIVIDE'
+    node.operation = "DIVIDE"
     node.update()
     node.inputs[0].default_value = (0.0, 0.0, 0.0)  # Default vector value
     node.inputs[1].default_value = (1.0, 1.0, 1.0)  # Default vector value
@@ -52,20 +54,29 @@ def ND_divide_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_image_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     file_input = mx_node.getInput("file")
     image_path = file_input.getValueString()
-    node: bpy.types.ShaderNodeTexImage = create_blender_node(tree, mx_node, bpy.types.ShaderNodeTexImage)
+    node: bpy.types.ShaderNodeTexImage = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeTexImage
+    )
     if os.path.exists(image_path):
         bl_image = bpy.data.images.load(image_path, check_existing=True)
     else:
         bl_image = bpy.data.images.new(name=image_path, width=1, height=1)
-        bl_image.generated_color = (0.0, 0.0, 0.0, 0.0)  # Default color if image not found
+        bl_image.generated_color = (
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        )  # Default color if image not found
     # use suffix of image_path?
-    bl_image.colorspace_settings.name = 'sRGB'  # Assuming the image is in sRGB color space
+    bl_image.colorspace_settings.name = (
+        "sRGB"  # Assuming the image is in sRGB color space
+    )
     node.image = bl_image
     # node.colorspace_settings.name = 'Linear Rec.709'
-    node.interpolation = 'Linear'
+    node.interpolation = "Linear"
 
     mx_node_inputs = {}
-    mx_node_inputs["texcoord"] = node.inputs['Vector']
+    mx_node_inputs["texcoord"] = node.inputs["Vector"]
 
     apply_default_values(mx_node, mx_node_inputs)
 
@@ -77,7 +88,7 @@ def ND_image_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_multiply_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
 
-    node.operation = 'MULTIPLY'
+    node.operation = "MULTIPLY"
     node.update()
     node.inputs[0].default_value = (0.0, 0.0, 0.0)  # Default vector value
     node.inputs[1].default_value = (1.0, 1.0, 1.0)  # Default vector value
@@ -96,7 +107,7 @@ def ND_multiply_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_subtract_vector2(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
 
-    node.operation = 'SUBTRACT'
+    node.operation = "SUBTRACT"
     node.update()
     node.inputs[0].default_value = (0.0, 0.0, 0.0)  # Default vector value
     node.inputs[1].default_value = (0.0, 0.0, 0.0)  # Default vector value
@@ -127,7 +138,7 @@ def ND_ifequal_floatB(tree: bpy.types.NodeTree, mx_node: mx.Node):
     ```
     """
     compare_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    compare_node.operation = 'COMPARE'
+    compare_node.operation = "COMPARE"
     compare_node.inputs[0].default_value = 0.0  # First value
     compare_node.inputs[1].default_value = 0.0  # Second value
     compare_node.inputs[2].default_value = 0.0  # Epsilon value
@@ -167,7 +178,7 @@ def ND_ifequal_color3B(tree: bpy.types.NodeTree, mx_node: mx.Node):
     ```
     """
     compare_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    compare_node.operation = 'COMPARE'
+    compare_node.operation = "COMPARE"
     compare_node.inputs[0].default_value = 0.0  # First value
     compare_node.inputs[1].default_value = 0.0  # Second value
     compare_node.inputs[2].default_value = 0.0  # Epsilon value
@@ -194,7 +205,7 @@ def ND_ifequal_color3B(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_ifequal_vector3B")
 def ND_subtract_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    node.operation = 'SUBTRACT'
+    node.operation = "SUBTRACT"
     node.inputs[0].default_value = 0.0  # Default value for input 1
     node.inputs[1].default_value = 0.0  # Default value for input 2
 
@@ -211,7 +222,7 @@ def ND_subtract_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_multiply_float")
 def ND_multiply_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    node.operation = 'MULTIPLY'
+    node.operation = "MULTIPLY"
     node.update()
     node.inputs[0].default_value = 0.0  # Default factor for multiplication
     node.inputs[1].default_value = 1.0  # Default factor for multiplication
@@ -242,8 +253,8 @@ def ND_multiply_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_mix_vector3")
 def ND_mix_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
-    node.data_type = 'VECTOR'
-    node.factor_mode = 'UNIFORM'
+    node.data_type = "VECTOR"
+    node.factor_mode = "UNIFORM"
     node.update()
     node.inputs["A"].default_value = (0.0, 0.0, 0.0)
     node.inputs["B"].default_value = (0.0, 0.0, 0.0)
@@ -263,7 +274,9 @@ def ND_mix_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_convert_vector4_vector3")
 def ND_convert_vector4_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     # if vector4 is an input, we have to also spawn an input of constants here
-    vec4_input = blender_from_vector4_bundle(tree, mx_node, bpy.types.NodeReroute)
+    vec4_input = blender_from_vector4_bundle(
+        tree, mx_node, bpy.types.NodeReroute
+    )
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeCombineXYZ)
     tree.links.new(vec4_input.outputs[0], node.inputs[0])
     tree.links.new(vec4_input.outputs[1], node.inputs[1])
@@ -282,36 +295,57 @@ def ND_convert_vector4_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_tiledimage_vector4(tree: bpy.types.NodeTree, mx_node: mx.Node):
     file_input = mx_node.getInput("file")
     image_path = file_input.getValueString()
-    node: bpy.types.ShaderNodeTexImage = create_blender_node(tree, mx_node, bpy.types.ShaderNodeTexImage)
+    node: bpy.types.ShaderNodeTexImage = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeTexImage
+    )
     if os.path.exists(image_path):
         bl_image = bpy.data.images.load(image_path, check_existing=True)
     else:
         bl_image = bpy.data.images.new(name=image_path, width=1, height=1)
-        bl_image.generated_color = (0.0, 0.0, 0.0, 0.0)  # Default color if image not found
+        bl_image.generated_color = (
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        )  # Default color if image not found
     # use suffix of image_path?
-    bl_image.colorspace_settings.name = 'Linear Rec.709'  # Assuming the image is in Rec.709 color space
+    bl_image.colorspace_settings.name = (
+        "Linear Rec.709"  # Assuming the image is in Rec.709 color space
+    )
     node.image = bl_image
     # node.colorspace_settings.name = 'Linear Rec.709'
-    node.interpolation = 'Linear'
+    node.interpolation = "Linear"
     uv_map = create_blender_node(tree, mx_node, bpy.types.ShaderNodeUVMap)
-    uv_tiling = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_tiling.operation = 'MULTIPLY'
+    uv_tiling = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_tiling.operation = "MULTIPLY"
     uv_tiling.inputs[1].default_value = (1.0, 1.0, 1.0)  # Tiling factor
-    uv_offset = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_offset.operation = 'ADD'
-    tree.links.new(node.inputs[0], uv_offset.outputs[0])  # Connect UV offset to image node
+    uv_offset = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_offset.operation = "ADD"
+    tree.links.new(
+        node.inputs[0], uv_offset.outputs[0]
+    )  # Connect UV offset to image node
     tree.links.new(uv_tiling.inputs[0], uv_map.outputs[0])
     tree.links.new(uv_offset.inputs[0], uv_tiling.outputs[0])
-    split_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeSeparateXYZ)
-    bundle = blender_to_vector4_bundle(tree, mx_node, bpy.types.NodeCombineBundle)
-    tree.links.new(split_node.inputs[0], node.outputs[0]) # RGB to split
-    tree.links.new(bundle.inputs[0], split_node.outputs[0]) # X
-    tree.links.new(bundle.inputs[1], split_node.outputs[1]) # Y
-    tree.links.new(bundle.inputs[2], split_node.outputs[2]) # Z
-    tree.links.new(bundle.inputs[3], node.outputs[1]) # (Alpha)
+    split_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeSeparateXYZ
+    )
+    bundle = blender_to_vector4_bundle(
+        tree, mx_node, bpy.types.NodeCombineBundle
+    )
+    tree.links.new(split_node.inputs[0], node.outputs[0])  # RGB to split
+    tree.links.new(bundle.inputs[0], split_node.outputs[0])  # X
+    tree.links.new(bundle.inputs[1], split_node.outputs[1])  # Y
+    tree.links.new(bundle.inputs[2], split_node.outputs[2])  # Z
+    tree.links.new(bundle.inputs[3], node.outputs[1])  # (Alpha)
 
     mx_node_inputs = {}
-    mx_node_inputs["texcoord"] = uv_tiling.inputs[0] # by default connected to uv_map node defined above
+    mx_node_inputs["texcoord"] = uv_tiling.inputs[
+        0
+    ]  # by default connected to uv_map node defined above
     mx_node_inputs["uvtiling"] = uv_tiling.inputs[1]
     mx_node_inputs["uvoffset"] = uv_offset.inputs[1]
 
@@ -325,36 +359,57 @@ def ND_tiledimage_vector4(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_tiledimage_color4(tree: bpy.types.NodeTree, mx_node: mx.Node):
     file_input = mx_node.getInput("file")
     image_path = file_input.getValueString()
-    node: bpy.types.ShaderNodeTexImage = create_blender_node(tree, mx_node, bpy.types.ShaderNodeTexImage)
+    node: bpy.types.ShaderNodeTexImage = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeTexImage
+    )
     if os.path.exists(image_path):
         bl_image = bpy.data.images.load(image_path, check_existing=True)
     else:
         bl_image = bpy.data.images.new(name=image_path, width=1, height=1)
-        bl_image.generated_color = (0.0, 0.0, 0.0, 0.0)  # Default color if image not found
+        bl_image.generated_color = (
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        )  # Default color if image not found
     # use suffix of image_path?
-    bl_image.colorspace_settings.name = 'sRGB'  # Assuming the image is in sRGB color space
+    bl_image.colorspace_settings.name = (
+        "sRGB"  # Assuming the image is in sRGB color space
+    )
     node.image = bl_image
     # node.colorspace_settings.name = 'Linear Rec.709'
-    node.interpolation = 'Linear'
+    node.interpolation = "Linear"
     uv_map = create_blender_node(tree, mx_node, bpy.types.ShaderNodeUVMap)
-    uv_tiling = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_tiling.operation = 'MULTIPLY'
+    uv_tiling = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_tiling.operation = "MULTIPLY"
     uv_tiling.inputs[1].default_value = (1.0, 1.0, 1.0)  # Tiling factor
-    uv_offset = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_offset.operation = 'ADD'
-    tree.links.new(node.inputs[0], uv_offset.outputs[0])  # Connect UV offset to image node
+    uv_offset = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_offset.operation = "ADD"
+    tree.links.new(
+        node.inputs[0], uv_offset.outputs[0]
+    )  # Connect UV offset to image node
     tree.links.new(uv_tiling.inputs[0], uv_map.outputs[0])
     tree.links.new(uv_offset.inputs[0], uv_tiling.outputs[0])
-    split_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeSeparateXYZ)
-    bundle = blender_to_color4_bundle(tree, mx_node, bpy.types.NodeCombineBundle)
-    tree.links.new(split_node.inputs[0], node.outputs[0]) # RGB to split
-    tree.links.new(bundle.inputs[0], split_node.outputs[0]) # X
-    tree.links.new(bundle.inputs[1], split_node.outputs[1]) # Y
-    tree.links.new(bundle.inputs[2], split_node.outputs[2]) # Z
-    tree.links.new(bundle.inputs[3], node.outputs[1]) # (Alpha)
+    split_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeSeparateXYZ
+    )
+    bundle = blender_to_color4_bundle(
+        tree, mx_node, bpy.types.NodeCombineBundle
+    )
+    tree.links.new(split_node.inputs[0], node.outputs[0])  # RGB to split
+    tree.links.new(bundle.inputs[0], split_node.outputs[0])  # X
+    tree.links.new(bundle.inputs[1], split_node.outputs[1])  # Y
+    tree.links.new(bundle.inputs[2], split_node.outputs[2])  # Z
+    tree.links.new(bundle.inputs[3], node.outputs[1])  # (Alpha)
 
     mx_node_inputs = {}
-    mx_node_inputs["texcoord"] = uv_tiling.inputs[0] # by default connected to uv_map node defined above
+    mx_node_inputs["texcoord"] = uv_tiling.inputs[
+        0
+    ]  # by default connected to uv_map node defined above
     mx_node_inputs["uvtiling"] = uv_tiling.inputs[1]
     mx_node_inputs["uvoffset"] = uv_offset.inputs[1]
 
@@ -368,30 +423,49 @@ def ND_tiledimage_color4(tree: bpy.types.NodeTree, mx_node: mx.Node):
 def ND_tiledimage_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
     file_input = mx_node.getInput("file")
     image_path = file_input.getValueString()
-    node: bpy.types.ShaderNodeTexImage = create_blender_node(tree, mx_node, bpy.types.ShaderNodeTexImage)
+    node: bpy.types.ShaderNodeTexImage = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeTexImage
+    )
     if os.path.exists(image_path):
         bl_image = bpy.data.images.load(image_path, check_existing=True)
     else:
         bl_image = bpy.data.images.new(name=image_path, width=1, height=1)
-        bl_image.generated_color = (0.0, 0.0, 0.0, 1.0)  # Default color if image not found
+        bl_image.generated_color = (
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+        )  # Default color if image not found
     # use suffix of image_path?
-    bl_image.colorspace_settings.name = 'Linear Rec.709'  # Assuming the image is in Rec.709 color space
+    bl_image.colorspace_settings.name = (
+        "Linear Rec.709"  # Assuming the image is in Rec.709 color space
+    )
     node.image = bl_image
     # node.colorspace_settings.name = 'Linear Rec.709'
-    node.interpolation = 'Linear'
+    node.interpolation = "Linear"
     uv_map = create_blender_node(tree, mx_node, bpy.types.ShaderNodeUVMap)
-    uv_tiling = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_tiling.operation = 'MULTIPLY'
+    uv_tiling = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_tiling.operation = "MULTIPLY"
     uv_tiling.inputs[1].default_value = (1.0, 1.0, 1.0)  # Tiling factor
-    uv_offset = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    uv_offset.operation = 'ADD'
-    tree.links.new(node.inputs[0], uv_offset.outputs[0])  # Connect UV offset to image node
+    uv_offset = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    uv_offset.operation = "ADD"
+    tree.links.new(
+        node.inputs[0], uv_offset.outputs[0]
+    )  # Connect UV offset to image node
     tree.links.new(uv_tiling.inputs[0], uv_map.outputs[0])
     tree.links.new(uv_offset.inputs[0], uv_tiling.outputs[0])
-    split_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeSeparateXYZ)
-    tree.links.new(split_node.inputs[0], node.outputs[0]) # RGB to split
+    split_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeSeparateXYZ
+    )
+    tree.links.new(split_node.inputs[0], node.outputs[0])  # RGB to split
     mx_node_inputs = {}
-    mx_node_inputs["texcoord"] = uv_tiling.inputs[0] # by default connected to uv_map node defined above
+    mx_node_inputs["texcoord"] = uv_tiling.inputs[
+        0
+    ]  # by default connected to uv_map node defined above
     mx_node_inputs["uvtiling"] = uv_tiling.inputs[1]
     mx_node_inputs["uvoffset"] = uv_offset.inputs[1]
 
@@ -404,11 +478,18 @@ def ND_tiledimage_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_normalmap_float")
 def ND_normalmap_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeNormalMap)
-    node.inputs[1].default_value = (0.5, 0.5, 1.0, 1.0)  # Default normal map value
+    node.inputs[1].default_value = (
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+    )  # Default normal map value
     node.inputs[0].default_value = 1.0
 
-    multiply_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    multiply_node.operation = 'MULTIPLY'
+    multiply_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeVectorMath
+    )
+    multiply_node.operation = "MULTIPLY"
     multiply_node.inputs[1].default_value = (1.0, -1.0, 1.0)
 
     tree.links.new(multiply_node.inputs[0], node.outputs[0])
@@ -425,25 +506,29 @@ def ND_normalmap_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
 
 @register_materialx_node("ND_extract_color4")
 def ND_extract_color4(tree: bpy.types.NodeTree, mx_node: mx.Node):
-    node = blender_from_color4_bundle(tree, mx_node, bpy.types.ShaderNodeSeparateColor)
+    node = blender_from_color4_bundle(
+        tree, mx_node, bpy.types.ShaderNodeSeparateColor
+    )
     constant = create_blender_node(tree, mx_node, bpy.types.NodeCombineBundle)
     constant.bundle_items.new("INT", "index")
-    constant_out = create_blender_node(tree, mx_node, bpy.types.NodeSeparateBundle)
+    constant_out = create_blender_node(
+        tree, mx_node, bpy.types.NodeSeparateBundle
+    )
     constant_out.bundle_items.new("INT", "index")
     mix1 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
     mix2 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
     mix3 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
     mix4 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
     subtract2 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    subtract2.operation = 'SUBTRACT'
+    subtract2.operation = "SUBTRACT"
     subtract2.use_clamp = True
     subtract2.inputs[1].default_value = 0.0
     subtract3 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    subtract3.operation = 'SUBTRACT'
+    subtract3.operation = "SUBTRACT"
     subtract3.use_clamp = True
     subtract3.inputs[1].default_value = 1.0
     subtract4 = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    subtract4.operation = 'SUBTRACT'
+    subtract4.operation = "SUBTRACT"
     subtract4.use_clamp = True
     subtract4.inputs[1].default_value = 2.0
     tree.links.new(constant_out.inputs[0], constant.outputs[0])
@@ -474,7 +559,9 @@ def ND_extract_color4(tree: bpy.types.NodeTree, mx_node: mx.Node):
 
 @register_materialx_node("ND_surfacematerial")
 def ND_surfacematerial(tree: bpy.types.NodeTree, mx_node: mx.Node):
-    node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeOutputMaterial)
+    node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeOutputMaterial
+    )
     mx_node_inputs = {}
     mx_node_inputs["surfaceshader"] = node.inputs[0]
 
@@ -487,7 +574,9 @@ def ND_surfacematerial(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_convert_color4_color3")
 def ND_convert_color4_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     # if vector4 is an input, we have to also spawn an input of constants here
-    vec4_input = blender_from_color4_bundle(tree, mx_node, bpy.types.NodeReroute)
+    vec4_input = blender_from_color4_bundle(
+        tree, mx_node, bpy.types.NodeReroute
+    )
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeCombineColor)
     tree.links.new(vec4_input.outputs[0], node.inputs[0])
     tree.links.new(vec4_input.outputs[1], node.inputs[1])
@@ -505,12 +594,22 @@ def ND_convert_color4_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_multiply_color3")
 def ND_multiply_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
-    node.data_type = 'RGBA'
-    node.blend_type = 'MULTIPLY'
+    node.data_type = "RGBA"
+    node.blend_type = "MULTIPLY"
     node.update()
     node.inputs[0].default_value = 1.0  # Default factor for multiplication
-    node.inputs[6].default_value = (0.0, 0.0, 0.0, 1.0)  # Default color for foreground
-    node.inputs[7].default_value = (1.0, 1.0, 1.0, 1.0)  # Default color for background
+    node.inputs[6].default_value = (
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    )  # Default color for foreground
+    node.inputs[7].default_value = (
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+    )  # Default color for background
     mx_node_inputs = {}
     mx_node_inputs["in1"] = node.inputs[6]
     mx_node_inputs["in2"] = node.inputs[7]
@@ -524,12 +623,22 @@ def ND_multiply_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_mix_color3")
 def ND_mix_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
-    node.data_type = 'RGBA'
-    node.blend_type = 'MIX'
+    node.data_type = "RGBA"
+    node.blend_type = "MIX"
     node.update()
     node.inputs[0].default_value = 0.0  # Default factor for mixing
-    node.inputs[6].default_value = (0.0, 0.0, 0.0, 1.0)  # Default color for foreground
-    node.inputs[7].default_value = (0.0, 0.0, 0.0, 1.0)  # Default color for background
+    node.inputs[6].default_value = (
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    )  # Default color for foreground
+    node.inputs[7].default_value = (
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    )  # Default color for background
     mx_node_inputs = {}
     mx_node_inputs["fg"] = node.inputs[6]
     mx_node_inputs["bg"] = node.inputs[7]
@@ -543,8 +652,10 @@ def ND_mix_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 
 @register_materialx_node("ND_convert_float_color3")
 def ND_convert_float_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
-    combine_color = create_blender_node(tree, mx_node, bpy.types.ShaderNodeCombineColor)
-    combine_color.mode = 'HSV'
+    combine_color = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeCombineColor
+    )
+    combine_color.mode = "HSV"
     combine_color.inputs[0].default_value = 0.0  # Default value for HSV
     combine_color.inputs[1].default_value = 0.0  # Default value for HSV
     combine_color.inputs[2].default_value = 0.0  # Default value for HSV
@@ -561,7 +672,7 @@ def ND_convert_float_color3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_distance_vector3")
 def ND_distance_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeVectorMath)
-    node.operation = 'DISTANCE'
+    node.operation = "DISTANCE"
     node.update()
     node.inputs[0].default_value = (0.0, 0.0, 0.0)  # Default vector value
     node.inputs[1].default_value = (0.0, 0.0, 0.0)  # Default vector value
@@ -579,9 +690,18 @@ def ND_distance_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
 @register_materialx_node("ND_convert_color3_vector3")
 def ND_convert_color3_vector3(tree: bpy.types.NodeTree, mx_node: mx.Node):
     # if color3 is an input, we have to also spawn an input of constants here
-    color_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeSeparateColor)
-    color_node.inputs[0].default_value = (0.0, 0.0, 0.0, 1.0)  # Default color value
-    vector_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeCombineXYZ)
+    color_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeSeparateColor
+    )
+    color_node.inputs[0].default_value = (
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    )  # Default color value
+    vector_node = create_blender_node(
+        tree, mx_node, bpy.types.ShaderNodeCombineXYZ
+    )
     tree.links.new(vector_node.inputs[0], color_node.outputs[0])  # R
     tree.links.new(vector_node.inputs[1], color_node.outputs[1])  # G
     tree.links.new(vector_node.inputs[2], color_node.outputs[2])  # B
