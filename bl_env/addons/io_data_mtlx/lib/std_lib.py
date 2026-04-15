@@ -203,20 +203,34 @@ def ND_ifequal_color3B(tree: bpy.types.NodeTree, mx_node: mx.Node):
 
 
 @register_materialx_node("ND_ifequal_vector3B")
-def ND_subtract_float(tree: bpy.types.NodeTree, mx_node: mx.Node):
-    node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
-    node.operation = "SUBTRACT"
-    node.inputs[0].default_value = 0.0  # Default value for input 1
-    node.inputs[1].default_value = 0.0  # Default value for input 2
+def ND_ifequal_vector3B(tree: bpy.types.NodeTree, mx_node: mx.Node):
+    """Create a Blender node network that represents the MaterialX ND_ifequal_vector3B node.
+    Uses a Compare node to check equality, then a Mix node to select outputs.
+    """
+    compare_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMath)
+    compare_node.operation = "COMPARE"
+    compare_node.inputs[0].default_value = 0.0
+    compare_node.inputs[1].default_value = 0.0
+    compare_node.inputs[2].default_value = 0.0
+    compare_node.update()
+
+    mix_node = create_blender_node(tree, mx_node, bpy.types.ShaderNodeMix)
+    mix_node.data_type = "VECTOR"
+    mix_node.update()
+    mix_node.inputs[2].default_value = (0.0, 0.0, 0.0)
+    mix_node.inputs[3].default_value = (0.0, 0.0, 0.0)
+    tree.links.new(mix_node.inputs[0], compare_node.outputs[0])
 
     mx_node_inputs = {}
-    mx_node_inputs["in1"] = node.inputs[0]
-    mx_node_inputs["in2"] = node.inputs[1]
+    mx_node_inputs["value1"] = compare_node.inputs[0]
+    mx_node_inputs["value2"] = compare_node.inputs[1]
+    mx_node_inputs["in1"] = mix_node.inputs[2]
+    mx_node_inputs["in2"] = mix_node.inputs[3]
 
     apply_default_values(mx_node, mx_node_inputs)
 
-    mx_node_outputs = {"out": node.outputs[0]}
-    return (node,), mx_node_inputs, mx_node_outputs
+    mx_node_outputs = {"out": mix_node.outputs["Result"]}
+    return (compare_node, mix_node), mx_node_inputs, mx_node_outputs
 
 
 @register_materialx_node("ND_multiply_float")

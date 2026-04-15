@@ -10,7 +10,7 @@ bl_info = {
     "name": "io_data_mtlx",
     "description": "MaterialX import for Blender",
     "author": "Frieder Erdmann, Activision",
-    "version": (0, 1, 0),
+    "version": (0, 1, 1),
     "blender": (5, 0, 0),
     "location": "Properties > Material",
     "category": "Import-Export",

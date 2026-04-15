@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/anson/Projects/MaterialX/resources/Materials/Examples/StandardSurface/chess_set/*.mtlx)",
+      "Bash(ls /Users/anson/Projects/MaterialX/resources/Materials/Examples/StandardSurface/chess_set/*.png)",
+      "Bash(python *)",
+      "Bash(conda activate *)",
+      "Bash(python3 *)"
+    ]
+  }
+}
