@@ -4,7 +4,6 @@
 import os
 import subprocess
 
-
 BLENDER_EXE = os.environ.get("BLENDER_EXE")
 
 
@@ -15,9 +14,11 @@ def main():
         raise RuntimeError(f"Blender executable not found at {BLENDER_EXE}")
     env = os.environ.copy()
     # Add paths to MaterialX libraries if needed
-    # env['MATERIALX_SEARCH_PATH'] = ""  
+    # env['MATERIALX_SEARCH_PATH'] = ""
     # env['PXR_USDMTLX_PLUGIN_SEARCH_PATHS'] = ""
-    env['BLENDER_SYSTEM_SCRIPTS'] = os.path.join(os.path.dirname(__file__), 'bl_env')
+    env["BLENDER_SYSTEM_SCRIPTS"] = os.path.join(
+        os.path.dirname(__file__), "bl_env"
+    )
     subprocess.run([BLENDER_EXE, "--python-use-system-env"], env=env)
 
 

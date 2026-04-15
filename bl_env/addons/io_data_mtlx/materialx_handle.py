@@ -3,19 +3,22 @@
 
 import logging
 import os
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
 import bpy
 import MaterialX as mx
-from dataclasses import dataclass
-from typing import Any, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+
     class TypedValue(mx.Value):
         def getData(self) -> Any: ...
 
-from . import material_properties as mp
+
 from . import material_generate
+from . import material_properties as mp
 
 
 @dataclass
@@ -24,7 +27,7 @@ class MTLXInput:
     node_name: str
     value_string: str
     prop_type: str
-    value: 'TypedValue'
+    value: "TypedValue"
     node_graph: bool = False
 
 
@@ -40,7 +43,7 @@ CONVERT_TYPE_MAP = {
     "VECTOR3": list,
     "VECTOR2": list,
     "MATRIX33": list,
-    "MATRIX44": list
+    "MATRIX44": list,
 }
 
 
@@ -56,14 +59,16 @@ CAST_BL_TO_MTLX_TYPE_MAP = {
     "VECTOR3": lambda x: mx.Vector3(list(x)),
     "VECTOR2": lambda x: mx.Vector2(list(x)),
     "MATRIX33": lambda x: mx.Matrix33(list(x)),
-    "MATRIX44": lambda x: mx.Matrix44(list(x))
+    "MATRIX44": lambda x: mx.Matrix44(list(x)),
 }
 
 
 class MaterialXHandle:
     def __init__(self, material: mp.Material):
         self._material: mp.Material = material
-        self.inputs: list[MTLXInput] = None  # will be populated by load_document
+        self.inputs: list[MTLXInput] = (
+            None  # will be populated by load_document
+        )
         self.document: mx.Document = None
 
     @property
@@ -117,20 +122,24 @@ class MaterialXHandle:
         for node in self.document.getNodeGraphs():
             self.inputs.extend(self.get_inputs_from_node(node))
 
-    def get_inputs_from_node(self, node: mx.Node | mx.NodeGraph) -> list[MTLXInput]:
+    def get_inputs_from_node(
+        self, node: mx.Node | mx.NodeGraph
+    ) -> list[MTLXInput]:
         """Get the inputs defined in a specific node or node graph."""
         inputs = []
         for _input in node.getInputs():
             if _input.getConnectedNode() or _input.getConnectedOutput():
                 continue
-            inputs.append(MTLXInput(
-                name=_input.getName(),
-                node_name=node.getName(),
-                value_string=_input.getValueString(),
-                prop_type=_input.getType(),
-                node_graph=isinstance(node, mx.NodeGraph),
-                value=_input._getValue(),
-            ))
+            inputs.append(
+                MTLXInput(
+                    name=_input.getName(),
+                    node_name=node.getName(),
+                    value_string=_input.getValueString(),
+                    prop_type=_input.getType(),
+                    node_graph=isinstance(node, mx.NodeGraph),
+                    value=_input._getValue(),
+                )
+            )
         return inputs
 
     def update_material_inputs(self):
@@ -139,11 +148,18 @@ class MaterialXHandle:
 
     def _remove_material_inputs(self):
         """remove any inputs from blender's interface that are no longer in the document"""
-        document_inputs = {(inp.name, inp.node_name, inp.prop_type.upper()) for inp in self.inputs}
+        document_inputs = {
+            (inp.name, inp.node_name, inp.prop_type.upper())
+            for inp in self.inputs
+        }
         mark_for_removal = []
         for i, _input in enumerate(self.material.mtlx_inputs):
             _input: mp.PG_MTLXInput
-            if (_input.name, _input.node_name, _input.prop_type.upper()) not in document_inputs:
+            if (
+                _input.name,
+                _input.node_name,
+                _input.prop_type.upper(),
+            ) not in document_inputs:
                 mark_for_removal.append(i)
                 continue
             if not _input.value.customized:
@@ -153,7 +169,9 @@ class MaterialXHandle:
 
     def _add_material_inputs(self):
         """add any new inputs from the document to blender's interface"""
-        blender_inputs = {(inp.name, inp.node_name) for inp in self.material.mtlx_inputs}
+        blender_inputs = {
+            (inp.name, inp.node_name) for inp in self.material.mtlx_inputs
+        }
         for i, _input in enumerate(self.inputs):
             if (_input.name, _input.node_name) in blender_inputs:
                 continue
@@ -162,8 +180,12 @@ class MaterialXHandle:
             mtlx_input.node_name = _input.node_name
             mtlx_input.value_string = _input.value_string
             mtlx_input.prop_type = _input.prop_type.upper()
-            mtlx_input.value[_input.prop_type.upper()] = CONVERT_TYPE_MAP[_input.prop_type.upper()](_input.value.getData())
-            self.material.mtlx_inputs.move(len(self.material.mtlx_inputs)-1, i)
+            mtlx_input.value[_input.prop_type.upper()] = CONVERT_TYPE_MAP[
+                _input.prop_type.upper()
+            ](_input.value.getData())
+            self.material.mtlx_inputs.move(
+                len(self.material.mtlx_inputs) - 1, i
+            )
 
     def on_blender_inputs_update(self):
         """If any of the blender inputs have changed, update the MaterialX document accordingly.
@@ -174,10 +196,14 @@ class MaterialXHandle:
             else:
                 node = self.document.getNode(_input.node_name)
 
-            blnd_input_value = self._get_value_from_blender_input(_input.name, _input.node_name)
+            blnd_input_value = self._get_value_from_blender_input(
+                _input.name, _input.node_name
+            )
             if blnd_input_value is None:
                 continue
-            value = CAST_BL_TO_MTLX_TYPE_MAP[_input.prop_type.upper()](blnd_input_value)
+            value = CAST_BL_TO_MTLX_TYPE_MAP[_input.prop_type.upper()](
+                blnd_input_value
+            )
 
             mx_input = node.getInput(_input.name)
             self._set_value_to_mx_input(mx_input, value)
@@ -190,7 +216,7 @@ class MaterialXHandle:
             if bl_input.name == name and bl_input.node_name == node_name:
                 return bl_input.value[bl_input.prop_type.upper()]
         return None
-    
+
     def _set_value_to_mx_input(self, mx_input: mx.Input, value: Any):
         """Set the value of a MaterialX input based on the type."""
         prop_type = mx_input.getType()
